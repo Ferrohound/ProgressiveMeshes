@@ -6,14 +6,12 @@
 #include <vector>
 #include <set>
 
+#include "Mesh.h"
+
 
 /*
 	for loading the obj files
 	getting their edges, faces & verts
-	
-	
-	use a Set to avoid double those vector points
-	for the edges
 */
 
 bool loadOBJ( const char* path,
