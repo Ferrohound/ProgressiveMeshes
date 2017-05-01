@@ -73,8 +73,14 @@ class Triangle
 			edge = NULL;
 		}
 		
-		Triangle( Vertex* a, Vertex* b, Vertex* c);
-		Triangle& operator = ( const Triangle& t );
+		Triangle( Vertex* a, Vertex* b, Vertex* c)
+		{
+			verts.push_back(a);
+			verts.push_back(b);
+			verts.push_back(c);
+		}
+
+		//Triangle& operator = ( const Triangle& t );
 		
 		//===========================================================Triangle Members
 		
@@ -115,7 +121,7 @@ class Mesh
         /*  Mesh Data  */
         //================================================================Mesh Functions
 		Mesh();
-        Mesh(vector<Vertex> vertices, vector<GLuint> indices);
+        Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, vector<Edge>& edges, vector<GLuint>& indices);
 		Mesh(char* path);
 		Mesh(const Mesh& m);
 		~Mesh();

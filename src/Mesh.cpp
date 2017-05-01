@@ -8,12 +8,6 @@
 
 //================================ TRIANGLE FUNCTIONS ===============================
 
-Triangle::Triangle( Vertex* a, Vertex* b, Vertex* c)
-{
-	verts.push_back(a);
-	verts.push_back(b);
-	verts.push_back(c);
-}
 
 bool Triangle::Contains(Vertex* vert)
 {
@@ -25,7 +19,7 @@ bool Triangle::Contains(Vertex* vert)
 }
 //==============================MESH FUNCTIONS======================================
 
-Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices)
+Mesh::Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, vector<Edge>& edges, vector<GLuint>& indices)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -36,7 +30,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices)
 
 Mesh::Mesh(char* path)
 {
-	//loadOBJ(path, &this->vertices, &this->indices, &this->textures);
+	loadOBJ(path, this->vertices, this->triangles, this->edges, this->indices/*, &this->textures*/);
 	//this->setupMesh();
 }
 

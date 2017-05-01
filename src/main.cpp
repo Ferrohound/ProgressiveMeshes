@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	
 	//Create meshes
-	Mesh* mesh = new Mesh("../data/models/bunny_1k.obj");
+	Mesh* mesh = new Mesh("../data/models/shipCrow.obj");
 	//pMesh* Progressive = new pMesh(mesh);
 	int max = /*mesh->NumVerts()*/100;
 	int current = max;

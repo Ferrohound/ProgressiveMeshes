@@ -20,24 +20,21 @@ using std::ifstream;
 */
 
 inline bool loadOBJ( const char* path,
-	std::vector < glm::vec3 > & verts,
-	std::vector < glm::vec2 > & uvs,
-	std::vector < glm::vec3 > & normals)
+	vector<Vertex>& vertices, 
+	vector<Triangle>& triangles, 
+	vector<Edge>& edges, 
+	vector<GLuint>& indices)
 	{	
-		ifstream file ("example.txt");
+		ifstream file (path);
 		
 		if( file == NULL )
 		{
 			std::cout<<"File is null"<<std::endl;
 			return false;
 		}
-		
-		//in an attempt to avoid dubs
-		//std::set<double> verts;
-		
-		std::vector<double> vertices;
-		std::vector<double> tex;
-		std::vector<double> normal;
+
+		std::vector<glm::vec2> UVs;
+		std::vector<glm::vec3> normals;
 		//use .find(thing)
 		
 		/*
@@ -52,43 +49,105 @@ inline bool loadOBJ( const char* path,
 		double U, V;
 		
 		//initializing stuff
-		glm::vec3 vert = glm::vec3(x, y, z);
-		glm::vec2 UV = glm::vec2(U, V);
+		//glm::vec3 vert = glm::vec3(x, y, z);
+		//glm::vec2 UV = glm::vec2(U, V);
 		glm::vec3 norm = glm::vec3(x, y, z);
 		
-		
+		std::cout<<"Reading OBJ File"<<std::endl;
+		//for skipping
+		char ch;
 		while ( std::getline(file, line) )
 		{
 			//dealing with a vertex
 			if( line.substr(0,2) == "v ")
 			{
+				std::cout<<"Reading Vertices..."<<std::endl;
 				std::istringstream v(line.substr(2));
 				v>>x;
 				v>>y;
 				v>>z;
-				
+				Vertex vert;
+				vert.Position = glm::vec3(x, y, z);
+				vertices.push_back(vert);
+				std::cout<<"Done."<<std::endl;
 				
 			}
 			//texture coord
 			else if( line.substr(0,2) == "vt" ) 
 			{
+				std::cout<<"Reading Texture coord..."<<std::endl;
 				std::istringstream v(line.substr(3));
+				v>>U;
+				v>>V;
+				glm::vec2 UV = glm::vec2(U, V);
+				UVs.push_back(UV);
+				std::cout<<"Done."<<std::endl;
 				
 			}
 			//normal
 			else if( line.substr(0,2) == "vn" ) 
 			{
+				std::cout<<"Reading Normal..."<<std::endl;
 				std::istringstream v(line.substr(3));
+				v>>x;
+				v>>y;
+				v>>z;
+				normals.push_back(glm::vec3(x, y, z));
+				std::cout<<"Done."<<std::endl;
 				
 			}
-			//face
+			//create the faces
 			else if( line.substr(0,2) == "f ") 
 			{
-				std::istringstream v(line.substr(2));
+				std::cout<<"Reading Face..."<<std::endl;
+				//std::istringstream v(line.substr(2));
+				//int vert, tex, norm;
+				int a, b, c;
+				int n1, n2, n3;
+				int t1, t2, t3;
+
+				const char* ln=line.c_str();
+				sscanf(ln, "f %i/%i/%i %i/%i/%i %i/%i/%i", &a, &t1, &n1, &b, &t2, &n2, &c, &t3, &n3);
+				std::cout<<ln<<std::endl;
+
+				//obj files are indexed 1-n instead of 0
+				a--; b--; c--;
+				n1--; n2--; n3--;
+				t1--; t2--; t3--;
+
+				/*vertices[vert].Normal = normals[norm];
+				vertices[vert].TexCoords = UVs[tex];*/
+
+				//create the new triangle
+				Triangle t = Triangle(&vertices[a], &vertices[b], &vertices[c]);
+				triangles.push_back(t);
+
+				vertices[a].Normal = normals[n1];
+				vertices[a].TexCoords = UVs[t1];
+
+				vertices[b].Normal = normals[n2];
+				vertices[b].TexCoords = UVs[t2];
+
+				vertices[c].Normal = normals[n3];
+				vertices[c].TexCoords = UVs[t3];
+
+				//make the edges
+
+
+				//pushback the triangles
+				vertices[a].triangles.push_back(&t);
+				vertices[b].triangles.push_back(&t);
+				vertices[c].triangles.push_back(&t);
+
+				//push back the indices
+				indices.push_back(a);
+				indices.push_back(b);
+				indices.push_back(c);
+				std::cout<<"Done."<<std::endl;
 				
 			}
 		}
 		
-		
-		return false;
+		std::cout<<"Mesh Loading Complete."<<std::endl;
+		return true;
 	}
