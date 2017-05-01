@@ -11,28 +11,28 @@
 
 //==============================MESH FUNCTIONS======================================
 
-Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures)
+Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices)
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->textures = textures;
+    //this->textures = textures;
 
     this->setupMesh();	
 }
 
 Mesh::Mesh(char* path)
 {
-	loadOBJ(path, &this->vertices, &this->indices, &this->textures);
-	this->setupMesh();
+	//loadOBJ(path, &this->vertices, &this->indices, &this->textures);
+	//this->setupMesh();
 }
 
 
 //copy constructor
-Mesh::Mesh(const mesh& m)
+Mesh::Mesh( const Mesh& m)
 {
-	this->vertices = m->vertices;
-	this->indices = m->indices;
-	this->textures = m->textures;
+	this->vertices = m.vertices;
+	this->indices = m.indices;
+	this->textures = m.textures;
 	
 	this->setupMesh();
 }
@@ -46,7 +46,7 @@ void Mesh::setupMesh()
 {
 	glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
-    glGenBuffers(1, &this->EBO);
+    //glGenBuffers(1, &this->EBO);
   
     glBindVertexArray(this->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
@@ -117,15 +117,15 @@ void Mesh::Clean()
 void Mesh::Draw( GLuint programID, const glm::mat4 &MVP)
 {
 	//glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-
-	GLint loc = glGetUniformLocation(ProgramObject, "u_mvp");
+	glUseProgram(programID);
+	GLint loc = glGetUniformLocation(programID, "u_mvp");
 	if (loc != -1)
 	{
-	   glUniformMatrix4fv(loc, 1, GL_FALSE, programID);
+	   glUniformMatrix4fv(loc, 1, GL_FALSE, &MVP[0][0]);
 	}
 	
-	//update indices in here
-    for()
+	//update indices in here ====================================================================
+    for(int i=0; i<0; i++)
     {
 		
     }
@@ -148,7 +148,7 @@ void Mesh::eCol(Vertex *u, Vertex *v)
 		return;
 	}
 	
-	std::vector<Vertex*> tmp;
+	std::vector<Edge*> tmp;
 	for(int i=0 ; i<u->edges.size(); i++)
 	{
 		tmp.push_back(u->edges[i]);
@@ -157,7 +157,7 @@ void Mesh::eCol(Vertex *u, Vertex *v)
 	//delete the shared
 	for(int i=0; i<u->triangles.size();i++)
 	{
-		if(u->triangles[i].Contains(v))
+		if(u->triangles[i]->Contains(v))
 		{
 			delete(u->triangles[i]);
 			tmp.erase(tmp.begin()+i);
@@ -166,14 +166,14 @@ void Mesh::eCol(Vertex *u, Vertex *v)
 	
 	for(int i=0; i<tmp.size(); i++)
 	{
-		tmp[i].Replace(u, v);
+		tmp[i]->Replace(u, v);
 	}
 	
 	delete u;
 	
 	for(int i=0; i<tmp.size(); i++)
 	{
-		ComputeEdgeCost(tmp[i]);
+		ComputeEdgeCost(tmp[i]->begin);
 	}
 }
 

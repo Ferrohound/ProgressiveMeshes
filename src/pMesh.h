@@ -1,5 +1,5 @@
-#ifndef MESH_H
-#define MESH_H
+#ifndef PMESH_H
+#define PMESH_H
 
 #include <stdio.h>
 #include <iostream>
@@ -11,6 +11,9 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+using std::vector;
+
 
 //pseudo Vertex/edge collapse class
 //Tells us where the edge is being sent to when it's collapsed
@@ -35,9 +38,10 @@ class pMesh
 		void Update( int n );
 		void Update2 ( int n );
 		void Reset();
+		Vertex* CheapestEdge() { return progressive->Cheapest(); }
 		
 		//draw the progressive mesh
-		void Draw();
+		void Draw(GLuint programID, const glm::mat4 &MVP) { progressive->Draw( programID, MVP); }
 	
 	private:
 		//keep a reference to the original mesh, display the progressive
@@ -50,4 +54,4 @@ class pMesh
 		std::vector<pVert> col;
 	
 };
-
+#endif

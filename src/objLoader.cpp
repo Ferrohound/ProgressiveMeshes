@@ -2,12 +2,17 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <ostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <set>
 
 #include "Mesh.h"
 
+using std::string;
+using std::vector;
+using std::ifstream;
 
 /*
 	for loading the obj files
@@ -19,7 +24,7 @@ bool loadOBJ( const char* path,
 	std::vector < glm::vec2 > & uvs,
 	std::vector < glm::vec3 > & normals)
 	{	
-		FILE* file = fopen(path, "r");
+		ifstream file ("example.txt");
 		
 		if( file == NULL )
 		{
@@ -28,7 +33,7 @@ bool loadOBJ( const char* path,
 		}
 		
 		//in an attempt to avoid dubs
-		std::set<double> verts;
+		//std::set<double> verts;
 		
 		std::vector<double> vertices;
 		std::vector<double> tex;
@@ -42,14 +47,14 @@ bool loadOBJ( const char* path,
 			f is the face => indices start at 1, not 0, 
 			formatted vertex/texture coord/normal
 		*/
-		String line;
+		string line;
 		double x, y, z;
 		double U, V;
 		
 		//initializing stuff
-		vert = glm::vec3(x, y, z);
-		normal = glm::vec3(x, y, z);
-		UV = glm::vec3(U, V);
+		glm::vec3 vert = glm::vec3(x, y, z);
+		glm::vec2 UV = glm::vec2(U, V);
+		glm::vec3 norm = glm::vec3(x, y, z);
 		
 		
 		while ( std::getline(file, line) )

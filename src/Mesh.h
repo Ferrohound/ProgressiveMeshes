@@ -7,9 +7,20 @@
 #include <fstream>
 #include <vector>
 
+// GLEW
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+// GLFW
+#include <GLFW/glfw3.h>
+
+//GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+
+using std::vector;
 
 /*
 	half edge bastardization
@@ -17,6 +28,7 @@
 
 class Vertex;
 class Triangle;
+class Edge;
 
 //===========================================================================VERTEX
 struct Vertex
@@ -25,8 +37,8 @@ struct Vertex
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
 	//list of triangles which contain this vert
-	std::vector<Triangle*> triangles;
-	std::vector<Edge*> edges;
+	vector<Triangle*> triangles;
+	vector<Edge*> edges;
 	int id;
 };
 
@@ -80,7 +92,7 @@ class Triangle
 		}
 		
 		//check if the triangle contains vert 
-		void Contains(Vertex* vert);
+		bool Contains(Vertex* vert);
 		//replace vertex v with vertex u
 		void Replace(Vertex* u, Vertex* v);
 		//calculate & update the normal
@@ -97,14 +109,12 @@ class Triangle
 class Mesh
 {		
 	public:
-	
-		int numVerts() const { return verts.size(); }
 		
 		public:
         /*  Mesh Data  */
         //================================================================Mesh Functions
 		Mesh();
-        Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
+        Mesh(vector<Vertex> vertices, vector<GLuint> indices);
 		Mesh(char* path);
 		Mesh(const Mesh& m);
 		~Mesh();
@@ -134,7 +144,7 @@ class Mesh
 		//representation
 		vector<Vertex> vertices;
         vector<GLuint> indices;
-        vector<Texture> textures;
+        vector<int> textures;
 		vector<Triangle> triangles;
 		vector<Edge> edges;
 };
@@ -148,14 +158,14 @@ cost n
 */
 float Cost(Vertex *u, Vertex *v)
 {
-	float length = glm::Distance(u->Position, v->Position);
+	float length = glm::distance(u->Position, v->Position);
 	float curve = 0;
 	
-	std::vector<Triangle*>shared;
+	vector<Triangle*>shared;
 	//get the triangles that share edge uv
 	for(int i=0; i<u->triangles.size(); i++)
 	{
-		if(u->triangles[i].Contains(v))
+		if(u->triangles[i]->Contains(v))
 			shared.push_back(u->triangles[i]);
 	}
 	
@@ -165,8 +175,8 @@ float Cost(Vertex *u, Vertex *v)
 		float min = 1;
 		for( int j=0; j<shared.size(); j++)
 		{
-			float dot = glm::dot(u->triangles[i].normal, shared[j]->normal);
-			min = std::min(min, (1-dot)/2.0);
+			float dot = glm::dot(u->triangles[i]->normal, shared[j]->normal);
+			min = std::min(min, (1-dot)/2.0f);
 		}
 		curve = std::max(curve, min);
 	}

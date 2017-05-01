@@ -21,10 +21,12 @@
 //#include <SDL.h>
 
 #include "controls.hpp"
+#include "Mesh.h"
 #include "pMesh.h"
 #include "shaderLoader.cpp"
 
 using std::cout;
+using std::vector;
 
 /*
 	Progressive meshes
@@ -38,7 +40,7 @@ using std::cout;
 
 int main(int argc, char* argv[])
 {
-	set_root_path(argv[0]);
+	//set_root_path(argv[0]);
 	
 	if( !glfwInit() )
 	{
@@ -102,36 +104,18 @@ int main(int argc, char* argv[])
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		
 		//decrease the vertex count with spacebar
-		if (glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS && current>0)
+		if (glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS && current>0)
 		{
 			current--;
 			Progressive->Update(current);
 		}
-		
-		double currentTime = glfwGetTime();
-		float deltaTime = float(currentTime - lastTime);
-		
-		float FoV = initialFoV - 5 * glfwGetMouseWheel();
-		
-		// Projection matrix : 45&deg; Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
-		// Camera matrix
-		ViewMatrix       = glm::lookAt(
-			position,           // Camera is here
-			position+direction, // and looks here : at the same position, plus "direction"
-			up                  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-		
-		glm::mat4 ModelMatrix = glm::mat4(1.0f);
-		
-		glm::mat4 mvp = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		glUseProgram(programID);
+		//glUseProgram(programID);
 		//Progressive->Draw();
-		mesh->Draw(mvp);
+		mesh->Draw(programID, MVP);
 		
 	}while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		!glfwWindowShouldClose(window))
+		!glfwWindowShouldClose(window));
 	
 	return 0;
 }

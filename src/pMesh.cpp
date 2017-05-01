@@ -1,13 +1,13 @@
 #include <vector>
 
-#include "pMesh.cpp"
+#include "pMesh.h"
 
 
 pMesh::pMesh(Mesh* m)
 {
 	//ideally make a copy of mesh m and store it inside of progressive
 	original = m;
-	progressive = new Mesh(m);
+	progressive = new Mesh(*m);
 	Initialize();
 }
 
@@ -22,17 +22,17 @@ void pMesh::Initialize()
 {
 	//collapse the mesh to 0
 	std::vector<Vertex*> tmp;
-	while ( progressive.NumVerts > 0 )
+	while ( progressive->NumVerts() > 0 )
 	{
-		Vertex *cheapest = progressive.CheapestEdge();
+		Vertex *cheapest = progressive->Cheapest();
 		tmp.push_back(cheapest);
-		progressive.eCol(cheapest, );
+		//progressive->eCol(cheapest, null); ==========================================================
 	}
 	//reverse the order of pVert and ID the vertices accordingly
 	for( int i = tmp.size()-1 ; i > -1 ; i -- )
 	{
-		tmp[i].id = pVert.size();
-		pVert.push_back(tmp[i]);
+		tmp[i]->id = col.size();
+		col.push_back(tmp[i]);
 	}
 	
 }
@@ -42,13 +42,13 @@ void pMesh::Initialize()
 //this method doesn't use the pVert array 
 void pMesh::Update( int n )
 {
-	if( n < 0 || n > original.NumVerts() || n == progressive.NumVerts())
+	if( n < 0 || n > original->NumVerts() || n == progressive->NumVerts())
 		return;
 	
 	//collapse some edges
-	if ( n < progressive.NumVerts() )
+	if ( n < progressive->NumVerts() )
 	{
-		while ( progressive.NumVerts() != n )
+		while ( progressive->NumVerts() != n )
 		{
 			Vertex *cheapest = CheapestEdge();
 			//tmp.push_back(cheapest);
@@ -58,11 +58,11 @@ void pMesh::Update( int n )
 	
 	else
 	{
-		while ( progressive.NumVerts() != n )
+		while ( progressive->NumVerts() != n )
 		{
 			Vertex *cheapest = CheapestEdge();
 			//tmp.push_back(cheapest);
-			eSplit();	
+			progressive->vSplit();	
 		}
 	}
 }
@@ -76,12 +76,6 @@ void pMesh::Update2 ( int n )
 void pMesh::Reset()
 {
 	delete progressive;
-	progressive = new Mesh(original);
+	progressive = new Mesh(*original);
 }
 
-
-//draw the triangles
-void pMesh::Draw()
-{
-	progressive->Draw();
-}
