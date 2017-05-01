@@ -109,6 +109,7 @@ class Mesh
 		Mesh(const Mesh& m);
 		~Mesh();
 		
+        void Draw(GLuint programID, const glm::mat4 &MVP);
 		void setVBO();
 		void updateVBO();
 		void Clean();
