@@ -17,9 +17,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 //SDL? probably not
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
+//#define SDL_MAIN_HANDLED
+//#include <SDL.h>
 
+#include "controls.hpp"
 #include "pMesh.h"
 #include "shaderLoader.cpp"
 
@@ -33,30 +34,6 @@ using std::cout;
 		
 	Neil Clarke
 */
-
-void Movement()
-{
-	// Move forward
-	if (glfwGetKey( GLFW_KEY_UP ) == GLFW_PRESS)
-	{
-		position += direction * deltaTime * speed;
-	}
-	// Move backward
-	if (glfwGetKey( GLFW_KEY_DOWN ) == GLFW_PRESS)
-	{
-		position -= direction * deltaTime * speed;
-	}
-	// Strafe right
-	if (glfwGetKey( GLFW_KEY_RIGHT ) == GLFW_PRESS)
-	{
-		position += right * deltaTime * speed;
-	}
-	// Strafe left
-	if (glfwGetKey( GLFW_KEY_LEFT ) == GLFW_PRESS || glfwGetKey( GLFW_KEY_A) == GLFW_PRESS)
-	{
-		position -= right * deltaTime * speed;
-	}
-}
 
 
 int main(int argc, char* argv[])
@@ -96,6 +73,9 @@ int main(int argc, char* argv[])
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "../data/shaders/ga_constant_color_vert.glsl",
 		"../data/shaders/ga_constant_color_frag.glsl" );
+
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	
 	//Create meshes
 	Mesh* mesh = new Mesh("../data/models/bunny_1k.obj");
@@ -113,34 +93,13 @@ int main(int argc, char* argv[])
 	{
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		int xpos, ypos;
-		glfwGetMousePos(&xpos, &ypos);
-		
-		// Reset mouse position for next frame
-		glfwSetMousePos(1024/2, 768/2);
-		
-		// Compute new orientation
-		horizontalAngle += mouseSpeed * deltaTime * float(1024/2 - xpos );
-		verticalAngle   += mouseSpeed * deltaTime * float( 768/2 - ypos );
-		
-		glm::vec3 direction(
-			cos(verticalAngle) * sin(horizontalAngle),
-			sin(verticalAngle),
-			cos(verticalAngle) * cos(horizontalAngle)
-		);
-		
-		// Right vector
-		glm::vec3 right = glm::vec3(
-			sin(horizontalAngle - 3.14f/2.0f),
-			0,
-			cos(horizontalAngle - 3.14f/2.0f)
-		);
-		
-		// Up vector : perpendicular to both direction and right
-		glm::vec3 up = glm::cross( right, direction );
-		
-		Movement();
+
+		// Compute the MVP matrix from keyboard and mouse input
+		computeMatricesFromInputs();
+		glm::mat4 ProjectionMatrix = getProjectionMatrix();
+		glm::mat4 ViewMatrix = getViewMatrix();
+		glm::mat4 ModelMatrix = glm::mat4(1.0);
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		
 		//decrease the vertex count with spacebar
 		if (glfwGetKey( GLFW_KEY_SPACE ) == GLFW_PRESS && current>0)

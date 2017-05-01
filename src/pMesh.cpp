@@ -21,7 +21,7 @@ pMesh::~pMesh()
 void pMesh::Initialize()
 {
 	//collapse the mesh to 0
-	std::vector tmp;
+	std::vector<Vertex*> tmp;
 	while ( progressive.NumVerts > 0 )
 	{
 		Vertex *cheapest = progressive.CheapestEdge();
