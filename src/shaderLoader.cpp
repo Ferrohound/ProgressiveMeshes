@@ -1,3 +1,6 @@
+#ifndef LOADSH_H
+#define LOADSH_H
+
 #include <string>
 #include <ostream>
 #include <fstream>
@@ -18,7 +21,7 @@
 
 using std::vector;
 
-GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
+inline GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
 
 	// Create the shaders
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -111,3 +114,5 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
 
 	return ProgramID;
 }
+
+#endif

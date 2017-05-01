@@ -8,7 +8,21 @@
 
 //================================ TRIANGLE FUNCTIONS ===============================
 
+Triangle::Triangle( Vertex* a, Vertex* b, Vertex* c)
+{
+	verts.push_back(a);
+	verts.push_back(b);
+	verts.push_back(c);
+}
 
+bool Triangle::Contains(Vertex* vert)
+{
+	if(vert == NULL)
+		return false;
+	if(verts[0] == vert || verts[1] == vert || verts[2] == vert)
+		return true;
+	return false;
+}
 //==============================MESH FUNCTIONS======================================
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices)
@@ -166,14 +180,14 @@ void Mesh::eCol(Vertex *u, Vertex *v)
 	
 	for(int i=0; i<tmp.size(); i++)
 	{
-		tmp[i]->Replace(u, v);
+		//tmp[i]->Replace(u, v);
 	}
 	
 	delete u;
 	
 	for(int i=0; i<tmp.size(); i++)
 	{
-		ComputeEdgeCost(tmp[i]->begin);
+		ComputeEdgeCost(tmp[i]->start);
 	}
 }
 
@@ -189,6 +203,7 @@ Vertex* Mesh::Cheapest()
 {
 	Vertex* tmp;
 	float minCost = 10000;
+	float cost = 0;
 	
 	for(int i = 0; i<edges.size(); i++)
 	{

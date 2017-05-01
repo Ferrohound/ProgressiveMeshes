@@ -32,7 +32,7 @@ void pMesh::Initialize()
 	for( int i = tmp.size()-1 ; i > -1 ; i -- )
 	{
 		tmp[i]->id = col.size();
-		col.push_back(tmp[i]);
+		//col.push_back(tmp[i]);
 	}
 	
 }
@@ -52,7 +52,7 @@ void pMesh::Update( int n )
 		{
 			Vertex *cheapest = CheapestEdge();
 			//tmp.push_back(cheapest);
-			Collapse(cheapest);
+			//Collapse(cheapest);
 		}
 	}
 	

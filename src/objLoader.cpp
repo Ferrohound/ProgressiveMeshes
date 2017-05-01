@@ -19,7 +19,7 @@ using std::ifstream;
 	getting their edges, faces & verts
 */
 
-bool loadOBJ( const char* path,
+inline bool loadOBJ( const char* path,
 	std::vector < glm::vec3 > & verts,
 	std::vector < glm::vec2 > & uvs,
 	std::vector < glm::vec3 > & normals)

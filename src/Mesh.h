@@ -47,7 +47,7 @@ class Edge
 {
 	public:
 		Edge(Vertex *s, Vertex *e, Triangle *t);
-		~Edge();
+		//~Edge();
 	
 	//============================================================Edge Member Variables
 		Edge* next;
@@ -84,11 +84,11 @@ class Triangle
 				return NULL;
 			
 			if( i == 0 )
-				return edge->start;
+				return verts[0];
 			if( i == 1 )
-				return edge->next->start;
+				return verts[1];
 			if( i == 2 )
-				return edge->next->next->start;
+				return verts[2];
 		}
 		
 		//check if the triangle contains vert 
@@ -100,6 +100,7 @@ class Triangle
 		
 		//edge?
 		Edge* edge;
+		vector<Vertex*> verts;
 		glm::vec3 normal;
 		
 	
@@ -156,7 +157,7 @@ class Mesh
 cost n
 	u,v u v f normal n normal f Tu Tuv ( ) =−× − • { } { }
 */
-float Cost(Vertex *u, Vertex *v)
+inline float Cost(Vertex *u, Vertex *v)
 {
 	float length = glm::distance(u->Position, v->Position);
 	float curve = 0;
@@ -184,7 +185,7 @@ float Cost(Vertex *u, Vertex *v)
 	return length * curve;
 }
 
-void ComputeEdgeCost(Vertex* v)
+inline void ComputeEdgeCost(Vertex* v)
 {
 	
 }
