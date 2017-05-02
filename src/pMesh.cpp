@@ -80,15 +80,21 @@ void pMesh::Update2 ( float distance )
 	//percentage-wise
 	if(distance > maxD)
 		LOD = 0;
+	
+	//distance/maxD gets us what percentage along the range the target is
+	//but we want LOD to display ie) 75% of max detail when the distance is 25%
+	//100 % when the distance is ~0%
+	else if (distance!=0)
+	{
+		LOD = col.size() * ( 1- (distance/maxD));
+	}
 	else
 	{
-		LOD = col.size() * (distance/maxD);
+		LOD = col.size() - 1;
 	}
-
+	
 	//Recreate the triangles, using LOD as the filter for how far in to go
-
-
-
+	Update(LOD);
 }
 
 void pMesh::Reset()

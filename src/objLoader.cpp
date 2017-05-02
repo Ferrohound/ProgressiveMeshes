@@ -169,3 +169,38 @@ inline bool loadOBJ( const char* path,
 		std::cout<<"Mesh Loading Complete."<<std::endl;
 		return true;
 	}
+
+
+	//save the OBJ
+	inline bool saveOBJ( Mesh* mesh, char* path )
+	{
+		ofstream file;
+		file.open(path);
+
+		//write theheader
+		file << "# Blender3D v249 OBJ File: "<< mesh->name << ".blend\n";
+		file << "# www.blender3d.org\n";
+
+
+		//write the vertices
+		for(int i=0; i<mesh->vertices.size(); i++)
+		{
+			file<< "v "<<mesh->vertices[i].Position.x<<" "<<mesh->vertices[i].Position.y<<" "mesh->vertices[i].Position.z<<"\n";
+		}
+
+		//write the normals
+		for(int i=0; i<mesh->vertices.size(); i++)
+		{
+			file<< "vn "<<mesh->vertices[i].Normal.x<<" "<<mesh->vertices[i].Normal.y<<" "mesh->vertices[i].Normal.z<<"\n";
+
+		}
+
+		//write the faces
+		/*
+		for(int i=0; i<mesh->triangles.size(); i++)
+		{
+			file<<"f "<<mesh->triangles[0]<<"//"
+		}*/
+
+		return true;
+	}
