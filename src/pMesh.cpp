@@ -87,6 +87,8 @@ void pMesh::Update2 ( float distance )
 	else if (distance!=0)
 	{
 		LOD = col.size() * ( 1- (distance/maxD));
+		if(LOD == col.size())
+			LOD--;
 	}
 	else
 	{
@@ -94,7 +96,7 @@ void pMesh::Update2 ( float distance )
 	}
 	
 	//Recreate the triangles, using LOD as the filter for how far in to go
-	Update(LOD);
+	
 }
 
 void pMesh::Reset()
