@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
-	// Create and compile our GLSL program from the shaders
+	// Create and compile our GLSL program from the shaders, from openGL tutorial
 	GLuint programID = LoadShaders( "../data/shaders/ga_constant_color_vert.glsl",
 		"../data/shaders/ga_constant_color_frag.glsl" );
 
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	
 	//Create meshes
-	Mesh* mesh = new Mesh("../data/models/shipCrow.obj");
+	Mesh* mesh = new Mesh("../data/models/suzanne.obj");
 	//pMesh* Progressive = new pMesh(mesh);
 	int max = /*mesh->NumVerts()*/100;
 	int current = max;
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	
 	
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 30.0f);
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2000.0f);
 	
 	//main loop
 	do
@@ -200,7 +200,10 @@ int main(int argc, char* argv[])
 		if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS && current>0)
 		{
 			current--;
+			Vertex* tmp = mesh->Cheapest();
+			std::cout<<"looking for vertex with index "<<tmp->id<<std::endl;
 			//Progressive->Update(current);
+			mesh->eCol((Vertex*)tmp, (Vertex*)tmp->destiny/*, NULL*/);
 			cout<<current<<std::endl;
 		}
 
@@ -208,15 +211,16 @@ int main(int argc, char* argv[])
 		{
 
 			current++;
-			//progressive->Update(current);
+			//Progressive->Update(current);
 			cout<<current<<std::endl;
 		}
 
 		//glUseProgram(programID);
 		//Progressive->Draw();
-		//mesh->Draw(programID, MVP);
+		//Progressive->Draw(programID, MVP);
+		mesh->Draw(programID, MVP);
 
-		// Swap buffers, apparently this is very important
+		// Swap buffers, apparently this is important
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		

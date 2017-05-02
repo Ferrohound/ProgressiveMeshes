@@ -6,6 +6,13 @@
 
 //================================ EDGE FUNCTIONS ==================================
 
+/*Edge::Edge(Vertex &s, Vertex &e, Triangle *t)
+{
+	start = &s;
+	end = &e;
+	triangles.push_back(*t);
+}
+*/
 //================================ TRIANGLE FUNCTIONS ===============================
 
 
@@ -17,9 +24,21 @@ bool Triangle::Contains(Vertex* vert)
 		return true;
 	return false;
 }
+
+void Triangle::Replace(Vertex* u, Vertex* v)
+{
+	for( int i = 0; i<3 ; i++)
+	{
+		if(verts[i] == u)
+		{
+			verts[i] = v;
+			return;
+		}
+	}
+}
 //==============================MESH FUNCTIONS======================================
 
-Mesh::Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, vector<Edge>& edges, vector<GLuint>& indices)
+Mesh::Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, /*vector<Edge>& edges,*/ vector<GLuint>& indices)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -30,8 +49,8 @@ Mesh::Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, vector<Edge>& 
 
 Mesh::Mesh(char* path)
 {
-	loadOBJ(path, this->vertices, this->triangles, this->edges, this->indices/*, &this->textures*/);
-	//this->setupMesh();
+	loadOBJ(path, this->vertices, this->triangles, /*this->edges,*/ this->indices/*, &this->textures*/);
+	this->setupMesh();
 }
 
 
@@ -39,6 +58,8 @@ Mesh::Mesh(char* path)
 Mesh::Mesh( const Mesh& m)
 {
 	this->vertices = m.vertices;
+	this->triangles = m.triangles;
+	//this->edges = m.edges;
 	this->indices = m.indices;
 	this->textures = m.textures;
 	
@@ -54,7 +75,7 @@ void Mesh::setupMesh()
 {
 	glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
-    //glGenBuffers(1, &this->EBO);
+    glGenBuffers(1, &this->EBO);
   
     glBindVertexArray(this->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
@@ -62,11 +83,10 @@ void Mesh::setupMesh()
     glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), 
                  &this->vertices[0], GL_STATIC_DRAW);  
 	
-	/*
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), 
                  &this->indices[0], GL_STATIC_DRAW);
-	*/
 
     // Vertex Positions
     glEnableVertexAttribArray(0);	
@@ -119,6 +139,7 @@ void Mesh::Clean()
 {
 	glDeleteBuffers(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 }
 
 
@@ -132,7 +153,7 @@ void Mesh::Draw( GLuint programID, const glm::mat4 &MVP)
 	   glUniformMatrix4fv(loc, 1, GL_FALSE, &MVP[0][0]);
 	}
 	
-	//update indices in here ====================================================================
+	//update indices in here (probably) ====================================================================
     for(int i=0; i<0; i++)
     {
 		
@@ -147,44 +168,108 @@ void Mesh::Draw( GLuint programID, const glm::mat4 &MVP)
 // =====================================================edge collapse and vertex split
 
 //collapse the edge based on the given algorithm
-void Mesh::eCol(Vertex *u, Vertex *v)
+void Mesh::eCol(Vertex *u, Vertex *v/*, Edge* e*/)
 {
+	std::cout<<"Collapsing Edge Now..."<<std::endl;
 	//pop the edge from the indices?
 	if(v ==  NULL)
 	{
-		delete u;
+		std::cout<<"V is null!"<<std::endl;
+		for(int i=0 ; i< vertices.size(); i++)
+		{
+			if(vertices[i].id == u->id)
+			{
+				vertices.erase(vertices.begin()+i);
+				break;
+			}
+		}
+		//vec.erase(std::remove(vec.begin(), vec.end(), int_to_remove), vec.end());
+		std::cout<<"Lone Edge\nDone."<<std::endl;
+		//delete e;
+		//delete u;
 		return;
 	}
 	
-	std::vector<Edge*> tmp;
+	//get the edge to remove
+	//std::vector<Edge*> tmp;
+	/*
 	for(int i=0 ; i<u->edges.size(); i++)
 	{
-		tmp.push_back(u->edges[i]);
-	}
+		tmp.push_back(&u->edges[i]);
+		if(u->edges[i].end == v || u->edges[i].start == v)
+			e = &u->edges[i];
+	}*/
 	
 	//delete the shared
 	for(int i=0; i<u->triangles.size();i++)
 	{
 		if(u->triangles[i]->Contains(v))
 		{
-			delete(u->triangles[i]);
-			tmp.erase(tmp.begin()+i);
+			//delete(u->triangles[i]);
+			for(int j = 0; j<triangles.size(); j++)
+			{
+				Triangle k = triangles[j];
+				if(triangles[j] == k)
+					triangles.erase(triangles.begin()+j);
+			}
+			u->triangles.erase(u->triangles.begin()+i);
+			//tmp.erase(tmp.begin()+i);
 		}
 	}
 	
-	for(int i=0; i<tmp.size(); i++)
+	for(int i=0; i<u->triangles.size(); i++)
 	{
-		//tmp[i]->Replace(u, v);
+		u->triangles[i]->Replace(u, v);
+	}
+
+	//remove this vertex from its edges
+	for(int i=0; i<u->edges.size(); i++)
+	{
+		for(int j = 0; j<u->edges[i]->edges.size();j++)
+		{
+			if(u->edges[i]->edges[j] == u)
+			{
+				u->edges[i]->edges.erase(u->edges[i]->edges.begin() + j);
+			}
+		}
 	}
 	
-	delete u;
+	//need to remove edge u, v from the list as well
+	//delete u;
+	for(int i=0 ; i< vertices.size(); i++)
+	{
+		//std::cout<<vertices[i].id<<" "<<u->id<<std::endl;
+		if(vertices[i].id == u->id)
+		{
+			vertices.erase(vertices.begin()+i);
+			std::cout<<"Found you!"<<std::endl;
+			break;
+		}
+	}
+
+/*
+	for (int i = 0; i<edges.size(); i++)
+	{
+		Edge test = edges[i];
+		if(e->start == test.start && e->end == test.end)
+		{
+			edges.erase(edges.begin()+i);
+		}
+		if(e->start == test.end && e->end == test.start)
+		{
+			edges.erase(edges.begin()+i);
+		}
+	}*/
 	
-	for(int i=0; i<tmp.size(); i++)
+	/*for(int i=0; i<tmp.size(); i++)
 	{
 		ComputeEdgeCost(tmp[i]->start);
-	}
+	}*/
+	std::cout<<"Done."<<std::endl;
+	std::cout<<"Verts remaining=> "<<NumVerts()<<std::endl<<vertices.size()<<std::endl;
 }
 
+//no longer need this
 void Mesh::vSplit()
 {
 	
@@ -195,24 +280,58 @@ void Mesh::vSplit()
 //get the cheapest edge
 Vertex* Mesh::Cheapest()
 {
+	Vertex* rtn;
 	Vertex* tmp;
+	Vertex* tmp2;
+
+	Vertex* a;
+	Vertex* b;
+	//Edge* edge;
 	float minCost = 10000;
 	float cost = 0;
-	
-	for(int i = 0; i<edges.size(); i++)
+
+	std::cout<<"Searching for the cheapest now"<<std::endl;
+	//std::cout<<edges.size()<<" edges remaining."<<std::endl;
+	std::cout<<NumVerts()<<" verts remaining"<<std::endl;
+
+	for(int i = 0; i<vertices.size(); i++)
 	{
-		cost = Cost(edges[i].start, edges[i].end);
-		if(cost<minCost)
+		//std::cout<<"bump"<<std::endl;
+		a = &vertices[i];
+		for(int j = 0; j<a->edges.size(); j++)
 		{
-			tmp = edges[i].start;
-			minCost = cost;
+			//std::cout<<"bump"<<std::endl;
+			b = a->edges[j];
+			//cost =& Cost(edges[i].start, edges[i].end);
+			cost = Cost(a, b);
+			//std::cout<<"Cost is..."<<cost<<std::endl;
+			if(cost<minCost)
+			{
+				//tmp = edges[i].start;
+				tmp = a;
+				tmp2 = b;
+				minCost = cost;
+				//edge = &edges[i];
+			}
+			//cost = Cost(edges[i].start, edges[i].end);
+			cost = Cost(b, a);
+			//std::cout<<"Cost is..."<<cost<<std::endl;
+			if(cost<minCost)
+			{
+				//tmp = edges[i].end;
+				tmp = b;
+				tmp2 = a;
+				minCost = cost;
+				//edge = &edges[i];
+			}	
 		}
-		cost = Cost(edges[i].end, edges[i].start);
-		if(cost<minCost)
-		{
-			tmp = edges[i].end;
-			minCost = cost;
-		}	
 	}
-	return tmp;
+	//set this edge's destiny vertex
+	std::cout<<"Found the cheapest."<<std::endl;
+	tmp->destiny = tmp2;
+
+	rtn = tmp;
+
+	std::cout<<"Returning the cheapest vert to remove"<<std::endl;
+	return rtn;
 }

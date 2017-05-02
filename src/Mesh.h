@@ -28,7 +28,7 @@ using std::vector;
 
 class Vertex;
 class Triangle;
-class Edge;
+//class Edge;
 
 //===========================================================================VERTEX
 struct Vertex
@@ -38,15 +38,20 @@ struct Vertex
 	glm::vec2 TexCoords;
 	//list of triangles which contain this vert
 	vector<Triangle*> triangles;
-	vector<Edge*> edges;
-	int id;
+	//vector<Edge> edges;
+	vector<Vertex*> edges;
+	Vertex* destiny;
+	int id = -1;
 };
 
 //===========================================================================EDGE
+/*
+Maybe removing the edge class entirely will make things easier.
+
 class Edge
 {
 	public:
-		Edge(Vertex *s, Vertex *e, Triangle *t);
+		Edge(Vertex &s, Vertex &e, Triangle *t);
 		//~Edge();
 	
 	//============================================================Edge Member Variables
@@ -57,21 +62,18 @@ class Edge
 		Vertex* end;
 		
 		//list of triangles which contain this edge
-		Triangle** triangles;
+		vector<Triangle> triangles;
 		
 		float length;
 		
 	//============================================================Edge Member functions
-};
+};*/
 
 //===========================================================================TRIANGLE
 class Triangle
 {
 	public:
-		Triangle()
-		{
-			edge = NULL;
-		}
+		Triangle() { }
 		
 		Triangle( Vertex* a, Vertex* b, Vertex* c)
 		{
@@ -86,7 +88,7 @@ class Triangle
 		
 		Vertex* operator[](int i) const
 		{
-			if(edge == NULL || i>2)
+			if(i>2)
 				return NULL;
 			
 			if( i == 0 )
@@ -96,6 +98,16 @@ class Triangle
 			if( i == 2 )
 				return verts[2];
 		}
+
+		bool operator == (Triangle t) const 
+		{
+			for( int i=0 ; i< 3 ; i++)
+			{
+				if(verts[i]->id != t.verts[i]->id)
+					return false;
+			}
+			return true;
+		}
 		
 		//check if the triangle contains vert 
 		bool Contains(Vertex* vert);
@@ -104,8 +116,6 @@ class Triangle
 		//calculate & update the normal
 		void UpdateNormal();
 		
-		//edge?
-		Edge* edge;
 		vector<Vertex*> verts;
 		glm::vec3 normal;
 		
@@ -121,7 +131,7 @@ class Mesh
         /*  Mesh Data  */
         //================================================================Mesh Functions
 		Mesh();
-        Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, vector<Edge>& edges, vector<GLuint>& indices);
+        Mesh(vector<Vertex>& vertices, vector<Triangle>& triangles, /*vector<Edge>& edges, */vector<GLuint>& indices);
 		Mesh(char* path);
 		Mesh(const Mesh& m);
 		~Mesh();
@@ -132,7 +142,7 @@ class Mesh
 		void Clean();
 		
 		// =====================================================edge collapse and vertex split
-		void eCol(Vertex *u, Vertex *v);
+		void eCol(Vertex *u, Vertex *v/*, Edge* e*/);
 		void vSplit();
 		
 		//function to get the mesh to the correct level of detail
@@ -144,7 +154,7 @@ class Mesh
 		
 	private:
         /*  Render data  */
-        GLuint VAO, VBO;
+        GLuint VAO, VBO, EBO;
         /*  Functions    */
         void setupMesh();
 		
@@ -153,7 +163,7 @@ class Mesh
         vector<GLuint> indices;
         vector<int> textures;
 		vector<Triangle> triangles;
-		vector<Edge> edges;
+		//vector<Edge> edges;
 };
 
 

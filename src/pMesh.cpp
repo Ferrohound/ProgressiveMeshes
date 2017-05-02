@@ -3,11 +3,12 @@
 #include "pMesh.h"
 
 
-pMesh::pMesh(Mesh* m)
+pMesh::pMesh(Mesh* m, float distance)
 {
 	//ideally make a copy of mesh m and store it inside of progressive
 	original = m;
 	progressive = new Mesh(*m);
+	maxD = maxD;
 	Initialize();
 }
 
@@ -26,15 +27,20 @@ void pMesh::Initialize()
 	{
 		Vertex *cheapest = progressive->Cheapest();
 		tmp.push_back(cheapest);
-		//progressive->eCol(cheapest, null); ==========================================================
-	}
-	//reverse the order of pVert and ID the vertices accordingly
-	for( int i = tmp.size()-1 ; i > -1 ; i -- )
-	{
-		tmp[i]->id = col.size();
-		//col.push_back(tmp[i]);
-	}
+		progressive->eCol(cheapest, cheapest->destiny/*, NULL*/); //==========================================FIX THIS
+		//reverse the order of pVert and ID the vertices accordingly
+		for( int i = tmp.size()-1 ; i > -1 ; i -- )
+		{
+			tmp[i]->id = col.size();
+			
+			pVert V;
+			V.from = tmp[i];
+			V.to = tmp[i]->destiny;
+
+			col.push_back(V);
+		}
 	
+	}
 }
 
 
@@ -52,7 +58,7 @@ void pMesh::Update( int n )
 		{
 			Vertex *cheapest = CheapestEdge();
 			//tmp.push_back(cheapest);
-			//Collapse(cheapest);
+			progressive->eCol(cheapest, cheapest->destiny/*, NULL*/);
 		}
 	}
 	
@@ -68,9 +74,21 @@ void pMesh::Update( int n )
 }
 
 //this methd does used the preserved info from Initialize()
-void pMesh::Update2 ( int n )
+//Update the mesh proportionally to the maxD set
+void pMesh::Update2 ( float distance )
 {
-	
+	//percentage-wise
+	if(distance > maxD)
+		LOD = 0;
+	else
+	{
+		LOD = col.size() * (distance/maxD);
+	}
+
+	//Recreate the triangles, using LOD as the filter for how far in to go
+
+
+
 }
 
 void pMesh::Reset()
@@ -79,3 +97,13 @@ void pMesh::Reset()
 	progressive = new Mesh(*original);
 }
 
+
+Vertex* pMesh::progress(pVert p)
+{
+	while(p.index > LOD)
+	{
+		p = p.to;
+	}
+
+	return p;
+}
