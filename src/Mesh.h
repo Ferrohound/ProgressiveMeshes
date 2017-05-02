@@ -151,8 +151,9 @@ class Mesh
 		//return the number of vertices
 		int NumVerts() { return vertices.size(); }
 		Vertex* Cheapest();
+		string name;
 		
-	private:
+	//private:
         /*  Render data  */
         GLuint VAO, VBO, EBO;
         /*  Functions    */
